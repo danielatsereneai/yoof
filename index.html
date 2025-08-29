@@ -18,16 +18,16 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 10px; /* ✅ mobile safe */
+      padding: 10px; /* mobile safe */
     }
 
     .content {
-      background: rgba(255, 255, 255, 0.2); /* ✅ transparent but visible */
+      background: rgba(255, 255, 255, 0.2); /* transparent but visible */
       padding: 30px;
       max-width: 500px;
       width: 100%;
-      border-radius: 15px; /* ✅ rounded */
-      box-shadow: 0 8px 20px rgba(0,0,0,0.25); /* ✅ floating effect */
+      border-radius: 15px; /* rounded */
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25); /* floating effect */
     }
 
     /* Styling for the image replacing the heading */
@@ -64,12 +64,12 @@
       background: rgba(255,255,255,0.6);
       width: 100%;
       font-size: 1em;
-      color: #333; /* ✅ readable text inside */
+      color: #333; /* readable text inside */
       transition: border 0.3s, background 0.3s;
       margin-bottom: 15px; /* Added spacing */
     }
 
-    /* ✅ Validation feedback */
+    /* Validation feedback */
     input:invalid {
       border-color: #BB2A63;
     }
@@ -77,7 +77,7 @@
       border-color: #188BBC;
     }
 
-    /* ✅ Placeholder contrast fix */
+    /* Placeholder contrast fix */
     input::placeholder {
       color: #666;
       opacity: 1;
@@ -91,7 +91,7 @@
       background: rgba(255,255,255,0.6);
       padding: 8px;
       border-radius: 8px;
-      color: #333; /* ✅ better readability */
+      color: #333; /* better readability */
       margin-bottom: 15px;
     }
 
@@ -168,6 +168,14 @@
       background-color: #f44336;
       color: white;
     }
+
+    #form-message {
+      margin-top: 15px;
+      font-size: 1.1em;
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -177,7 +185,7 @@
     <p>Crafting creative fun for the family with AI.</p>
 
     <!-- Netlify Form -->
-    <form name="contact" method="POST" data-netlify="true">
+    <form name="contact" id="contact-form" method="POST" data-netlify="true">
       <input type="hidden" name="form-name" value="contact">
 
       <label for="name">Name</label>
@@ -196,6 +204,7 @@
 
       <button type="submit">Notify Me</button>
     </form>
+    <div id="form-message"></div>
 
     <footer>
       &copy; 2025 YOOF. All rights reserved.
@@ -211,29 +220,128 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- Firebase & GDPR Logic ---
+    let db;
+    let auth;
+    let userId;
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : undefined;
+
+    const initializeFirebase = async () => {
+      try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // Sign in with custom token or anonymously
+        if (initialAuthToken) {
+          await signInWithCustomToken(auth, initialAuthToken);
+        } else {
+          await signInAnonymously(auth);
+        }
+        userId = auth.currentUser?.uid || crypto.randomUUID();
+        console.log("Firebase initialized. User ID:", userId);
+
+        checkGdprConsent();
+
+      } catch (error) {
+        console.error("Error initializing Firebase:", error);
+      }
+    };
+
+    const checkGdprConsent = async () => {
+      const gdprBanner = document.getElementById('gdpr-banner');
+      if (!userId) {
+        // If user ID is not available, show banner by default
+        gdprBanner.style.display = 'flex';
+        return;
+      }
+      const gdprDocRef = doc(db, 'artifacts', appId, 'users', userId, 'gdpr_consent', 'status');
+      try {
+        const gdprDocSnap = await getDoc(gdprDocRef);
+        if (gdprDocSnap.exists()) {
+          gdprBanner.style.display = 'none';
+        } else {
+          gdprBanner.style.display = 'flex';
+        }
+      } catch (error) {
+        console.error("Error checking GDPR consent:", error);
+        gdprBanner.style.display = 'flex';
+      }
+    };
+
+    const handleGdprConsent = async (status) => {
+      if (!userId) {
+        console.error("User ID not available, cannot save GDPR consent.");
+        return;
+      }
+      const gdprDocRef = doc(db, 'artifacts', appId, 'users', userId, 'gdpr_consent', 'status');
+      try {
+        await setDoc(gdprDocRef, { accepted: status, timestamp: new Date() });
+        document.getElementById('gdpr-banner').style.display = 'none';
+      } catch (error) {
+        console.error("Error saving GDPR consent:", error);
+      }
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
+      initializeFirebase();
+
       const gdprBanner = document.getElementById('gdpr-banner');
       const acceptBtn = gdprBanner.querySelector('.accept');
       const rejectBtn = gdprBanner.querySelector('.reject');
 
-      // Check if user has already accepted or rejected
-      const gdprStatus = localStorage.getItem('gdprAccepted');
-      if (gdprStatus !== null) {
-        gdprBanner.style.display = 'none';
+      acceptBtn.addEventListener('click', () => handleGdprConsent(true));
+      rejectBtn.addEventListener('click', () => handleGdprConsent(false));
+    });
+
+    // --- Form Submission Logic ---
+    const form = document.getElementById('contact-form');
+    const formMessage = document.getElementById('form-message');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const submitBtn = form.querySelector('button[type="submit"]');
+
+      // Disable button and show a loading message
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      formMessage.style.display = 'none';
+
+      try {
+        const response = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(formData).toString(),
+        });
+
+        if (response.ok) {
+          formMessage.textContent = 'Thank you! Your information has been sent.';
+          formMessage.style.color = '#4CAF50';
+          form.reset(); // Clear the form on success
+        } else {
+          formMessage.textContent = 'Something went wrong. Please try again.';
+          formMessage.style.color = '#f44336';
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        formMessage.textContent = 'An error occurred. Please check your connection and try again.';
+        formMessage.style.color = '#f44336';
+      } finally {
+        // Re-enable button and display message
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Notify Me';
+        formMessage.style.display = 'block';
       }
-
-      // Handle "Accept" click
-      acceptBtn.addEventListener('click', () => {
-        localStorage.setItem('gdprAccepted', 'true');
-        gdprBanner.style.display = 'none';
-      });
-
-      // Handle "Reject" click
-      rejectBtn.addEventListener('click', () => {
-        localStorage.setItem('gdprAccepted', 'false');
-        gdprBanner.style.display = 'none';
-      });
     });
   </script>
 </body>
