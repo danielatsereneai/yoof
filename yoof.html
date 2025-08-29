@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="YOOF is creating fun and educational experiences for children. Sign up to get notified when we launch!">
+  <title>YOOF - Coming Soon</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', 'Comic Neue', Arial, sans-serif;
+      text-align: center;
+      background: url("https://i.imgur.com/ER96uMu.png") no-repeat center top;
+      background-size: cover;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 10px; /* ✅ mobile safe */
+    }
+
+    .content {
+      background: rgba(255, 255, 255, 0.2); /* ✅ transparent but visible */
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      border-radius: 15px; /* ✅ rounded */
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25); /* ✅ floating effect */
+    }
+
+    /* Styling for the image replacing the heading */
+    .coming-soon-image {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    }
+
+    form {
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    label {
+      font-size: 0.95em;
+      color: #fff;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input[type="text"], input[type="email"], input[type="tel"] {
+      padding: 10px;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      outline: none;
+      background: rgba(255,255,255,0.6);
+      width: 100%;
+      font-size: 1em;
+      color: #333; /* ✅ readable text inside */
+      transition: border 0.3s, background 0.3s;
+      margin-bottom: 15px; /* Added spacing */
+    }
+
+    /* ✅ Validation feedback */
+    input:invalid {
+      border-color: #BB2A63;
+    }
+    input:valid {
+      border-color: #188BBC;
+    }
+
+    /* ✅ Placeholder contrast fix */
+    input::placeholder {
+      color: #666;
+      opacity: 1;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9em;
+      background: rgba(255,255,255,0.6);
+      padding: 8px;
+      border-radius: 8px;
+      color: #333; /* ✅ better readability */
+      margin-bottom: 15px;
+    }
+
+    button {
+      background: #4cafef;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1em;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #388edc;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+    }
+
+    .gdpr-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 0.9em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      z-index: 1000;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .gdpr-banner p {
+      margin: 0;
+      padding: 0;
+      font-size: 1em;
+      color: white;
+      text-shadow: none;
+    }
+
+    .gdpr-banner .gdpr-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .gdpr-banner button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+      width: auto;
+    }
+
+    .gdpr-banner .accept {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .gdpr-banner .reject {
+      background-color: #f44336;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <!-- Coming Soon Image -->
+    <img src="https://i.imgur.com/q4DMnqe.png" alt="We're Coming Soon!" class="coming-soon-image">
+    <p>Crafting creative fun for the family with AI.</p>
+
+    <!-- Netlify Form -->
+    <form name="contact" method="POST" data-netlify="true">
+      <input type="hidden" name="form-name" value="contact">
+
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" placeholder="Your Name" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="Your Email" required>
+
+      <label for="phone">Phone</label>
+      <input type="tel" id="phone" name="phone" placeholder="Your Phone Number" required>
+
+      <label class="checkbox-label">
+        <input type="checkbox" name="permission" required>
+        I agree to be contacted when YOOF launches.
+      </label>
+
+      <button type="submit">Notify Me</button>
+    </form>
+
+    <footer>
+      &copy; 2025 YOOF. All rights reserved.
+    </footer>
+  </div>
+
+  <!-- GDPR Banner -->
+  <div class="gdpr-banner" id="gdpr-banner">
+    <p>This website uses cookies to ensure you get the best experience. By clicking "Accept", you consent to our use of cookies. <a href="#" style="color: lightblue;">Learn more</a></p>
+    <div class="gdpr-buttons">
+      <button class="accept">Accept</button>
+      <button class="reject">Reject</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const gdprBanner = document.getElementById('gdpr-banner');
+      const acceptBtn = gdprBanner.querySelector('.accept');
+      const rejectBtn = gdprBanner.querySelector('.reject');
+
+      // Check if user has already accepted or rejected
+      const gdprStatus = localStorage.getItem('gdprAccepted');
+      if (gdprStatus !== null) {
+        gdprBanner.style.display = 'none';
+      }
+
+      // Handle "Accept" click
+      acceptBtn.addEventListener('click', () => {
+        localStorage.setItem('gdprAccepted', 'true');
+        gdprBanner.style.display = 'none';
+      });
+
+      // Handle "Reject" click
+      rejectBtn.addEventListener('click', () => {
+        localStorage.setItem('gdprAccepted', 'false');
+        gdprBanner.style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
